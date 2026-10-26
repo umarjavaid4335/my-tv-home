@@ -58,7 +58,7 @@ public class HomeActivity extends Activity {
 
     private FrameLayout root;
     private ImageView bgFront, bgBack;
-    private TextView time, date, focusLabel, credit;
+    private TextView time, date, focusLabel, credit, helperNote;
     private TextView wCity, wStatus, wTemp, wCond, wHiLo;
     private Glyph wIcon;
     private LinearLayout forecast;
@@ -104,6 +104,7 @@ public class HomeActivity extends Activity {
     @Override protected void onResume() {
         super.onResume();
         HomeHelperService.clearAllowance(this);
+        helperNote.setVisibility(HomeHelperService.setUpButOff(this) ? View.VISIBLE : View.GONE);
         Log.i(TAG, "resumed");
         IntentFilter f = new IntentFilter(Intent.ACTION_TIME_TICK);
         f.addAction(Intent.ACTION_TIME_CHANGED);
@@ -183,6 +184,12 @@ public class HomeActivity extends Activity {
 
         credit = Ui.text(this, 11, Ui.REGULAR, WHITE_60);
         root.addView(credit, lp(-2, -2, Gravity.BOTTOM | Gravity.END, 0, 0, 60, 18));
+
+        // Shown only when the Home-button helper was set up but the TV has switched it off (it does after a restart).
+        helperNote = Ui.shadowed(Ui.text(this, 13, Ui.REGULAR, WHITE_80));
+        helperNote.setText("Home button helper is off  ·  Settings › Device Preferences › Accessibility › My Home: Home button");
+        helperNote.setVisibility(View.GONE);
+        root.addView(helperNote, lp(-2, -2, Gravity.BOTTOM | Gravity.START, 64, 0, 0, 18));
 
         setContentView(root);
     }

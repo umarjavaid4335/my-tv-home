@@ -20,7 +20,7 @@ case "${1:-}" in
   deploy)
     python -I tools/build_apk.py android/home | tail -1
     adb_ install -r private/build/home.apk | tail -1
-    adb_ shell am force-stop $PKG
+    # No `am force-stop`: on this TV a force-stop switches the Home-button helper (accessibility) off.
     adb_ shell input keyevent KEYCODE_WAKEUP
     adb_ shell am start -W -n $PKG/.HomeActivity | grep -E "TotalTime" ;;
   start) adb_ shell am start -W -n $PKG/.HomeActivity | grep -E "Status|TotalTime" ;;

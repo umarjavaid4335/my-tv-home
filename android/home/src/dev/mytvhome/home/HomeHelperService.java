@@ -50,5 +50,22 @@ public class HomeHelperService extends AccessibilityService {
         prefs(c).edit().putLong(PREF_ALLOW, 0).apply();
     }
 
+    /** Remember that the owner set the helper up, so My Home can say so if the TV later switches it off. */
+    @Override protected void onServiceConnected() {
+        prefs(this).edit().putBoolean("wasEnabled", true).apply();
+    }
+
+    /** True when the owner enabled the helper at some point but it is not running now (e.g. after a restart). */
+    static boolean setUpButOff(Context c) {
+        if (!prefs(c).getBoolean("wasEnabled", false)) return false;
+        android.view.accessibility.AccessibilityManager am =
+                (android.view.accessibility.AccessibilityManager) c.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        for (android.accessibilityservice.AccessibilityServiceInfo i
+                : am.getEnabledAccessibilityServiceList(android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK)) {
+            if (i.getId() != null && i.getId().startsWith(c.getPackageName() + "/")) return false;
+        }
+        return true;
+    }
+
     @Override public void onInterrupt() { }
 }
