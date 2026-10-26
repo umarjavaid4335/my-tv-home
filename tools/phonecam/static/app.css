@@ -1,0 +1,20 @@
+:root { color-scheme: dark; --bg: #0e1116; --fg: #e8ecf1; --muted: #8b95a3; --accent: #4f8cff; --danger: #e5484d; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.4 system-ui, sans-serif; }
+main { max-width: 560px; margin: 0 auto; padding: 16px; }
+header { display: flex; align-items: center; justify-content: space-between; }
+h1 { font-size: 20px; margin: 8px 0; }
+.badge { font-weight: 700; padding: 4px 10px; border-radius: 999px; font-size: 13px; }
+.badge.off { background: #2a2f37; color: var(--muted); }
+.badge.on { background: var(--danger); color: #fff; animation: pulse 1.6s infinite; }
+.badge.warn { background: #b7791f; color: #fff; }
+@keyframes pulse { 50% { opacity: .55; } }
+video { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; object-fit: cover; }
+.row { display: flex; gap: 12px; margin: 12px 0; }
+button { flex: 1; padding: 14px; font-size: 17px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; }
+button.danger { background: var(--danger); }
+button:disabled { opacity: .4; }
+dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; color: var(--muted); }
+dd { margin: 0; color: var(--fg); }
+.hint { color: var(--muted); font-size: 14px; }
+#msg { min-height: 1.4em; }

@@ -1,0 +1,27 @@
+# Private device data, logs, camera frames, evidence, tokens
+private/
+.env
+*.log
+
+# Signing material - never commit
+*.jks
+*.keystore
+keystore.properties
+*.p12
+*.pem
+*.key
+
+# Android / Gradle build output
+android/**/build/
+android/.gradle/
+android/local.properties
+android/**/*.apk
+android/**/*.aab
+.idea/
+*.iml
+
+# Python / Node
+__pycache__/
+*.pyc
+.venv/
+node_modules/

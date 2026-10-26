@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>TV Camera</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<main>
+  <header>
+    <h1>TV Camera</h1>
+    <span id="live" class="badge off">OFF</span>
+  </header>
+  <p id="msg">Pairing…</p>
+  <video id="v" playsinline muted autoplay></video>
+  <div class="row">
+    <button id="start" disabled>Start camera</button>
+    <button id="stop" class="danger" disabled>Stop camera</button>
+  </div>
+  <dl>
+    <dt>Frames sent</dt><dd id="count">0</dd>
+    <dt>Last upload</dt><dd id="last">—</dd>
+    <dt>Mode</dt><dd id="mode">—</dd>
+  </dl>
+  <p class="hint">Aim the camera at the whole TV screen. Keep this window open and not minimized, and the device unlocked; frames pause if the page is hidden or the screen locks.</p>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>
