@@ -6,6 +6,7 @@
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- Android 11+ package visibility: we only need apps that have a TV launcher entry. -->
     <queries>
@@ -32,6 +33,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <!-- Cold boot -> My Home (Quick Start standby already resumes the last app). -->
+        <receiver android:name=".BootReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
         <!-- Optional Home-button helper; does nothing until the owner enables it in Settings > Accessibility. -->
         <service android:name=".HomeHelperService" android:exported="true" android:label="@string/helper_label"

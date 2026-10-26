@@ -48,6 +48,9 @@ import java.util.Set;
 public class HomeActivity extends Activity {
     private static final String TAG = "MyHome";
     private static final int WHITE = 0xFFFFFFFF, WHITE_80 = 0xCCFFFFFF, WHITE_60 = 0x99FFFFFF;
+    // Layout grid (dp). 64 side margins, 48 top/bottom, 16 between stacked panels.
+    private static final int M = 64, EDGE = 48, GAP = 16, RIGHT_COL_W = 380, PILL_H = 64,
+            DOCK_TILE_H = 76, DOCK_PAD = 12;
 
     private final Handler main = new Handler(Looper.getMainLooper());
     private Backdrop backdrop;
@@ -149,47 +152,59 @@ public class HomeActivity extends Activity {
                 new int[]{0x55000000, 0x00000000, 0x00000000, 0x80000000}));
         root.addView(scrim, new FrameLayout.LayoutParams(-1, -1));
 
-        // Fixed width: wrap_content measured the spanned "h:mm  AM" too narrow on this firmware and clipped "AM".
-        root.addView(buildClock(), lp(dp(420), -2, Gravity.TOP | Gravity.START, 64, 52, 0, 0));
-        root.addView(buildWeather(), lp(dp(380), -2, Gravity.TOP | Gravity.END, 0, 52, 64, 0));
+        // One grid for everything (dp on a 960x540 screen): side margins M, top/bottom margins EDGE, gaps GAP.
+        // Right column = weather card + button pill, same width and edges; dock spans the full content width.
+        final int dockH = DOCK_TILE_H + 2 * DOCK_PAD;
+        final int pillBottom = EDGE + dockH + GAP;
+        final int weatherH = 540 - EDGE - pillBottom - PILL_H - GAP;
 
-        // Row above the dock: focused-item name on the left, utility pill on the right.
+        // Fixed width: wrap_content measured the spanned "h:mm  AM" too narrow on this firmware and clipped "AM".
+        // Top offset compensates the font's space above the digits so they line up with the weather card's top.
+        root.addView(buildClock(), lp(dp(420), -2, Gravity.TOP | Gravity.START, M, EDGE - 22, 0, 0));
+        root.addView(buildWeather(), lp(dp(RIGHT_COL_W), dp(weatherH), Gravity.TOP | Gravity.END, 0, EDGE, M, 0));
+
+        // Row above the dock: focused-item name on the left (centred on the pill), utility pill on the right.
         focusLabel = Ui.shadowed(Ui.text(this, 20, Ui.MEDIUM, WHITE));
-        root.addView(focusLabel, lp(-2, -2, Gravity.BOTTOM | Gravity.START, 64, 0, 0, 176));
+        focusLabel.setGravity(Gravity.CENTER_VERTICAL);
+        root.addView(focusLabel, lp(-2, dp(PILL_H), Gravity.BOTTOM | Gravity.START, M + 4, 0, 0, pillBottom));
 
         dockPanel = glass(26);
         HorizontalScrollView hs = new HorizontalScrollView(this);
         hs.setHorizontalScrollBarEnabled(false);
+        hs.setFillViewport(true);
         hs.setClipToPadding(false);
-        hs.setPadding(dp(12), dp(12), dp(12), dp(12));
+        hs.setPadding(dp(DOCK_PAD), dp(DOCK_PAD), dp(DOCK_PAD), dp(DOCK_PAD));
         dockRow = new LinearLayout(this);
         dockRow.setOrientation(LinearLayout.HORIZONTAL);
+        dockRow.setGravity(Gravity.CENTER);
         hs.addView(dockRow);
-        dockPanel.addView(hs, new FrameLayout.LayoutParams(-2, -2));
+        dockPanel.addView(hs, new FrameLayout.LayoutParams(-1, -2));
         dockPanel.setClipChildren(false);
-        root.addView(dockPanel, lp(-2, -2, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 48, 0, 48, 44));
+        root.addView(dockPanel, lp(-1, dp(dockH), Gravity.BOTTOM, M, 0, M, EDGE));
 
         pill = glass(24);
         LinearLayout buttons = new LinearLayout(this);
-        buttons.setPadding(dp(8), dp(8), dp(8), dp(8));
-        buttons.addView(utilityButton(Glyph.IMAGE, "Backgrounds", v -> openBackgroundSheet(v)));
-        buttons.addView(utilityButton(Glyph.GRID, "Arrange dock", v -> openDockSheet(v)));
-        buttons.addView(utilityButton(Glyph.GEAR, "Settings", v -> launch(new Intent(Settings.ACTION_SETTINGS))));
-        buttons.addView(utilityButton(Glyph.HOUSE, "Android TV Home", v -> {
+        buttons.setPadding(dp(8), 0, dp(8), 0);
+        buttons.setGravity(Gravity.CENTER_VERTICAL);
+        buttons.addView(cell(utilityButton(Glyph.IMAGE, "Backgrounds", v -> openBackgroundSheet(v))));
+        buttons.addView(cell(utilityButton(Glyph.GRID, "Arrange dock", v -> openDockSheet(v))));
+        buttons.addView(cell(utilityButton(Glyph.GEAR, "Settings", v -> launch(new Intent(Settings.ACTION_SETTINGS)))));
+        buttons.addView(cell(utilityButton(Glyph.HOUSE, "Android TV Home", v -> {
             HomeHelperService.allowStockOnce(this);     // the helper lets this one visit stay
             launch(new Intent(Intent.ACTION_MAIN).setClassName(HomeHelperService.STOCK, HomeHelperService.STOCK + ".MainActivity"));
-        }));
-        pill.addView(buttons);
-        root.addView(pill, lp(-2, -2, Gravity.BOTTOM | Gravity.END, 0, 0, 56, 160));
+        })));
+        pill.addView(buttons, new FrameLayout.LayoutParams(-1, -1));
+        root.addView(pill, lp(dp(RIGHT_COL_W), dp(PILL_H), Gravity.BOTTOM | Gravity.END, 0, 0, M, pillBottom));
 
+        // Footer line in the bottom margin, aligned to the same side margins.
         credit = Ui.text(this, 11, Ui.REGULAR, WHITE_60);
-        root.addView(credit, lp(-2, -2, Gravity.BOTTOM | Gravity.END, 0, 0, 60, 18));
+        root.addView(credit, lp(-2, -2, Gravity.BOTTOM | Gravity.END, 0, 0, M, 16));
 
         // Shown only when the Home-button helper was set up but the TV has switched it off (it does after a restart).
-        helperNote = Ui.shadowed(Ui.text(this, 13, Ui.REGULAR, WHITE_80));
+        helperNote = Ui.shadowed(Ui.text(this, 12, Ui.REGULAR, WHITE_80));
         helperNote.setText("Home button helper is off  ·  Settings › Device Preferences › Accessibility › My Home: Home button");
         helperNote.setVisibility(View.GONE);
-        root.addView(helperNote, lp(-2, -2, Gravity.BOTTOM | Gravity.START, 64, 0, 0, 18));
+        root.addView(helperNote, lp(-2, -2, Gravity.BOTTOM | Gravity.START, M, 0, 0, 16));
 
         setContentView(root);
     }
@@ -212,7 +227,8 @@ public class HomeActivity extends Activity {
         GlassPanel p = glass(28);
         LinearLayout col = new LinearLayout(this);
         col.setOrientation(LinearLayout.VERTICAL);
-        col.setPadding(dp(24), dp(20), dp(24), dp(16));
+        col.setGravity(Gravity.CENTER_VERTICAL);        // card height comes from the grid; centre the content
+        col.setPadding(dp(24), dp(14), dp(24), dp(12));
 
         LinearLayout head = new LinearLayout(this);
         wCity = Ui.text(this, 17, Ui.MEDIUM, WHITE);
@@ -249,8 +265,8 @@ public class HomeActivity extends Activity {
         View rule = new View(this);
         rule.setBackgroundColor(0x2EFFFFFF);
         LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(-1, dp(1));
-        rp.topMargin = dp(14);
-        rp.bottomMargin = dp(12);
+        rp.topMargin = dp(12);
+        rp.bottomMargin = dp(10);
         col.addView(rule, rp);
 
         forecast = new LinearLayout(this);
@@ -259,10 +275,20 @@ public class HomeActivity extends Activity {
         TextView attr = Ui.text(this, 9, Ui.REGULAR, 0x80FFFFFF);
         attr.setText("Weather data by Open-Meteo.com");
         LinearLayout.LayoutParams ap = new LinearLayout.LayoutParams(-2, -2);
-        ap.topMargin = dp(12);
+        ap.topMargin = dp(10);
         col.addView(attr, ap);
-        p.addView(col);
+        p.addView(col, new FrameLayout.LayoutParams(-1, -1));
         return p;
+    }
+
+    /** Equal-width slot so the pill's buttons are spread evenly across the right column. */
+    private View cell(View button) {
+        FrameLayout c = new FrameLayout(this);
+        c.setClipChildren(false);
+        ViewGroup.LayoutParams bp = button.getLayoutParams();
+        c.addView(button, new FrameLayout.LayoutParams(bp.width, bp.height, Gravity.CENTER));
+        c.setLayoutParams(new LinearLayout.LayoutParams(0, -1, 1));
+        return c;
     }
 
     private View utilityButton(int kind, final String label, final View.OnClickListener onClick) {
@@ -305,8 +331,6 @@ public class HomeActivity extends Activity {
         if (f != null && f.getTag() instanceof String) focusedPkg = (String) f.getTag();
         dockRow.removeAllViews();
         for (AppRepo.App a : repo.shown()) dockRow.addView(tile(a));
-        dockPanel.getLayoutParams().width = -2;
-        dockPanel.requestLayout();
         if (focusedPkg != null) focusTile(focusedPkg);
     }
 
@@ -585,7 +609,7 @@ public class HomeActivity extends Activity {
         }
         col.addView(row);
         p.addView(col);
-        showSheet(p, opener, currentThumb, lp(-1, -2, Gravity.BOTTOM, 48, 0, 48, 44));
+        showSheet(p, opener, currentThumb, lp(-1, -2, Gravity.BOTTOM, M, 0, M, EDGE));
     }
 
     private String motionLabel() { return "Gentle motion: " + (ui.getBoolean("motion", false) ? "On" : "Off"); }
@@ -613,7 +637,7 @@ public class HomeActivity extends Activity {
         p.addView(col);
         fillDockList(list, null, 1);
         showSheet(p, opener, list.getChildCount() > 0 ? ((ViewGroup) list.getChildAt(0)).getChildAt(1) : null,
-                lp(dp(620), -2, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0, 0, 44));
+                lp(dp(620), -2, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0, 0, EDGE));
     }
 
     /** Rows: [earlier] [app: OK toggles] [later]. After a change, focus returns to the same control. */
