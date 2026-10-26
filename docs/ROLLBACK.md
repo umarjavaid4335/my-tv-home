@@ -11,6 +11,9 @@ Optional, for completeness: **Settings > Apps > Default apps > Home app** (on th
 "Default home app"; also reachable with `adb shell am start -a android.settings.HOME_SETTINGS`) and pick
 **Android TV Home**. (On this firmware this choice does not change the Home button either way.)
 
+To stop My Home opening at power-on: **Safety Guard > Permission Shield > Auto Launch Permission > My Home >
+Closed** (or set Auto manager back to Opened, which was the original state).
+
 ## 2. Remove My Home completely
 - Remote: **Settings > Apps > See all apps > My Home > Uninstall**, or
 - Computer: `tools/tv.sh uninstall` (= `adb uninstall dev.mytvhome.home`).

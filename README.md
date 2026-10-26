@@ -48,11 +48,16 @@ Turn it on: **Settings (gear) > Device Preferences > Accessibility > My Home: Ho
 My Home > Force stop). A normal update (`adb install -r`, as `tools/tv.sh deploy` does) keeps it on. If the
 Home button ever opens the stock home again, check this switch first.
 
-**After a full restart (power cut, unplugging, reboot) this TCL firmware switches accessibility off**:
-the master switch is reset (`accessibility_enabled=0`) although Settings still lists the helper as "On".
-The TV then starts on the stock home, and My Home shows a small note at the bottom: *"Home button helper
-is off"*. Fix: Accessibility > My Home: Home button > Off, then On again. Normal standby (Power button,
-"Quick Start") is not affected - the TV wakes straight back into My Home.
+### Starting at power-on (TCL Safety Guard)
+TCL's **Safety Guard > Permission Shield > Auto Launch Permission** blocks downloaded apps from starting at
+boot ("Auto manager"). While My Home was "In auto management", a full restart (power cut, unplugging, or
+the TV's own occasional cold boot) left the TV on the stock home *and* stopped the Home-button helper from
+starting. Setting **Auto manager: Closed** and **My Home: Opened** fixed both - verified with a reboot:
+My Home in front 63 s after power-on, helper running, Home button -> My Home.
+(Safety Guard asks the owner to accept TCL's terms on first open.)
+
+If the Home button ever opens the stock home again, My Home shows a small note at the bottom
+(*"Home button helper is off"*): check the Accessibility switch and the Auto Launch Permission above.
 
 ## Build and install (Windows, from this repo)
 

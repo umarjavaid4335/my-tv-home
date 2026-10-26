@@ -26,16 +26,19 @@ Private device details (addresses, identifiers) live in `private/device-inventor
 | Home helper | Home -> stock -> My Home in ~0.1 s | logcat + camera |
 | Android TV Home button | stock home stays (10-min allowance) | adb |
 | Standby (Power) -> wake | wakes into My Home; no reboot (Quick Start) | owner + camera + uptime |
-| Full restart | boot_completed 64 s; **stock home; firmware resets accessibility master switch** | dumpsys accessibility |
+| Full restart (before fix) | boot_completed 64 s; stock home; helper never bound, BOOT_COMPLETED never delivered | dumpsys accessibility, logcat |
+| Root cause | TCL Safety Guard "Auto Launch Permission" (Auto manager) blocks third-party boot starts | Safety Guard UI, TclActivityManagerService logs |
+| Full restart (after owner allowed My Home) | My Home in front 63 s after reboot; helper bound; Home -> My Home | adb + camera |
+| Layout | single grid: 64 dp sides, 48 dp top/bottom, 16 dp gaps; right column + full-width dock aligned | screencap |
 | Force-stop | switches the helper off; plain `install -r` keeps it | dumpsys accessibility |
 | Launch times | cold 1.2-2.1 s (2.1 s just after boot), warm ~0.9-1.0 s (`am start -W`) | adb |
 | Idle | ~0.16 CPU-s per minute (~0.3 % of one core), ~29 MB PSS | /proc stat, meminfo |
 
-Not verified on device: the "helper is off" note appearing (needs another restart after the owner
-re-enables the helper; logic is in `HomeHelperService.setUpButOff`).
+The "helper is off" note was seen on screen while the helper was unbound, and disappears once it runs.
 
 ## Blockers / needs from owner
-- After any full restart: toggle Accessibility > My Home: Home button off/on (firmware limitation).
+- None. Keep Safety Guard > Auto Launch Permission > My Home = Opened. Avoid Force stop on My Home
+  (switches the helper off until it is toggled again).
 
 ## Next action
 - Optional: phone control / lighting per docs/ARCHITECTURE.md when wanted.
