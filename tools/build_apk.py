@@ -74,8 +74,10 @@ def build(app_dir):
         link += ["-A", app / "assets"]
     run(*link)
     srcs = [str(p) for p in (app / "src").rglob("*.java")] + [str(p) for p in (out / "gen").rglob("*.java")]
-    run(JH / "bin" / "javac", "-nowarn", "-encoding", "UTF-8", "-source", "8", "-target", "8",
-        "-bootclasspath", ANDROID_JAR, "-d", out / "classes", *srcs)
+    # java.* from the JDK's release-8 signatures (includes LambdaMetafactory); android.* from android.jar.
+    # d8 below desugars lambdas for the device.
+    run(JH / "bin" / "javac", "-nowarn", "-encoding", "UTF-8", "--release", "8",
+        "-classpath", ANDROID_JAR, "-d", out / "classes", *srcs)
     classes = [str(p) for p in (out / "classes").rglob("*.class")]
     run(tool("d8"), "--release", "--min-api", MIN_API, "--lib", ANDROID_JAR, "--output", out, *classes)
     shutil.copy(out / "base.apk", out / "unaligned.apk")
