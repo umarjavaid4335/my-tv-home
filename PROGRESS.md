@@ -53,3 +53,12 @@ The "helper is off" note was seen on screen while the helper was unbound, and di
 
 ## Next action
 - Optional: phone control / lighting per docs/ARCHITECTURE.md when wanted.
+
+### Live TV (2026-10-26)
+| Check | Result |
+|---|---|
+| Sources | 20 official YouTube 24/7 news streams (all live at build), 41 iptv-org streams that respond from this network (of 104), 4 ARY ZAP channels |
+| YouTube channel | Geo News opened from the grid; media session shows the 24/7 live stream playing (live id resolved at tap time; `/@handle/live` URLs open the wrong content in the TV app) |
+| In-app player | Bol Entertainment: HLS session started, audio playing ~4 s after OK; Up switched to BS Film; Back returned to My Home |
+| Picture | Owner confirmed Hum TV shows picture and sound (video is on a hardware layer that adb screenshots can't capture) |
+| Not included | Pirated restreams of pay channels (Geo Ent., PTV Sports, Star Sports...) - use ARY ZAP / Tamasha instead |
