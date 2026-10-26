@@ -19,12 +19,13 @@ import android.view.accessibility.AccessibilityEvent;
  */
 public class HomeHelperService extends AccessibilityService {
     static final String STOCK = "com.google.android.tvlauncher";
-    private static final String PREF_ALLOW = "allowStockOnce";
+    private static final String PREF_ALLOW = "allowStockUntil";
+    private static final long ALLOW_MS = 10 * 60 * 1000L;
     private long lastRedirect;
 
-    /** Called by My Home's "Android TV Home" button: let the next visit to the stock launcher stay. */
+    /** Called by My Home's "Android TV Home" button: the stock launcher may stay for up to 10 minutes. */
     static void allowStockOnce(Context c) {
-        prefs(c).edit().putBoolean(PREF_ALLOW, true).apply();
+        prefs(c).edit().putLong(PREF_ALLOW, System.currentTimeMillis() + ALLOW_MS).apply();
     }
 
     private static SharedPreferences prefs(Context c) {
@@ -35,7 +36,7 @@ public class HomeHelperService extends AccessibilityService {
         if (e.getEventType() != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return;
         if (!STOCK.contentEquals(String.valueOf(e.getPackageName()))) return;
         SharedPreferences p = prefs(this);
-        if (p.getBoolean(PREF_ALLOW, false)) return;               // owner chose the stock home on purpose
+        if (System.currentTimeMillis() < p.getLong(PREF_ALLOW, 0)) return;   // owner chose the stock home on purpose
         long now = SystemClock.elapsedRealtime();
         if (now - lastRedirect < 1500) return;                      // never loop
         lastRedirect = now;
@@ -46,7 +47,7 @@ public class HomeHelperService extends AccessibilityService {
 
     /** The one-time allowance ends as soon as My Home is shown again. */
     static void clearAllowance(Context c) {
-        prefs(c).edit().putBoolean(PREF_ALLOW, false).apply();
+        prefs(c).edit().putLong(PREF_ALLOW, 0).apply();
     }
 
     @Override public void onInterrupt() { }
