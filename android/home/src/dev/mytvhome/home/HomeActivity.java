@@ -54,7 +54,7 @@ public class HomeActivity extends Activity {
     private static final int WHITE = 0xFFFFFFFF, WHITE_80 = 0xCCFFFFFF, WHITE_60 = 0x99FFFFFF;
     // Layout grid (dp). 64 side margins, 48 top/bottom, 16 between stacked panels.
     private static final int M = 64, EDGE = 48, GAP = 16, RIGHT_COL_W = 380, PILL_H = 64,
-            DOCK_TILE_H = 76, DOCK_PAD = 12;
+            DOCK_TILE_H = 68, DOCK_PAD = 14;
 
     private final Handler main = new Handler(Looper.getMainLooper());
     private Backdrop backdrop;
@@ -199,6 +199,9 @@ public class HomeActivity extends Activity {
         dockRow = new LinearLayout(this);
         dockRow.setOrientation(LinearLayout.HORIZONTAL);
         dockRow.setGravity(Gravity.CENTER);
+        dockRow.setClipChildren(false);                   // let the focused tile grow and cast its shadow
+        dockRow.setClipToPadding(false);
+        hs.setClipChildren(false);
         hs.addView(dockRow);
         dockPanel.addView(hs, new FrameLayout.LayoutParams(-1, -2));
         dockPanel.setClipChildren(false);
@@ -356,27 +359,35 @@ public class HomeActivity extends Activity {
         if (f != null && f.getTag() instanceof String) focusedPkg = (String) f.getTag();
         dockRow.removeAllViews();
         for (AppRepo.App a : repo.shown()) dockRow.addView(tile(a));
+        int n = dockRow.getChildCount();
+        if (n > 0) {                                      // Left/Right stop at the dock's ends (Up reaches the buttons)
+            View first = dockRow.getChildAt(0), last = dockRow.getChildAt(n - 1);
+            first.setId(View.generateViewId());
+            last.setId(View.generateViewId());
+            first.setNextFocusLeftId(first.getId());
+            last.setNextFocusRightId(last.getId());
+        }
         if (focusedPkg != null) focusTile(focusedPkg);
     }
 
-    /** Outer frame = focus rim (drawn outside the banner so it shows on white banners too); inner = clipped banner. */
+    /**
+     * Dock tile. Focus = grow + lift with a soft rounded shadow while the other tiles dim; no outline
+     * (an outline with a gap read as a doubled, clipped ring on the TV).
+     */
     private View tile(final AppRepo.App a) {
+        final float radius = dp(10);
+        ViewOutlineProvider rounded = new ViewOutlineProvider() {
+            @Override public void getOutline(View v, Outline o) { o.setRoundRect(0, 0, v.getWidth(), v.getHeight(), radius); }
+        };
         FrameLayout outer = new FrameLayout(this);
         outer.setTag(a.pkg);
         outer.setFocusable(true);
         outer.setContentDescription(a.label);
-        outer.setPadding(dp(6), dp(6), dp(6), dp(6));     // 3dp rim + 3dp gap, so the rim reads on white banners
-        final GradientDrawable rim = new GradientDrawable();
-        rim.setCornerRadius(dp(16));
-        rim.setColor(0x00000000);
-        outer.setBackground(rim);
+        outer.setOutlineProvider(rounded);                // shape of the lift shadow
         FrameLayout t = new FrameLayout(this);
         outer.addView(t, new FrameLayout.LayoutParams(-1, -1));
         t.setClipToOutline(true);
-        final float radius = dp(10);
-        t.setOutlineProvider(new ViewOutlineProvider() {
-            @Override public void getOutline(View v, Outline o) { o.setRoundRect(0, 0, v.getWidth(), v.getHeight(), radius); }
-        });
+        t.setOutlineProvider(rounded);
         Drawable banner = repo.banner(a);
         if (banner != null) {
             ImageView iv = new ImageView(this);
@@ -397,11 +408,11 @@ public class HomeActivity extends Activity {
             c.addView(n);
             t.addView(c, new FrameLayout.LayoutParams(-1, -1));
         }
-        outer.setAlpha(0.88f);
+        outer.setAlpha(0.72f);
         outer.setOnFocusChangeListener((v, has) -> {
-            rim.setStroke(has ? dp(3) : 0, WHITE);
-            v.setAlpha(has ? 1f : 0.88f);
-            animateScale(v, has ? 1.08f : 1f);
+            v.setAlpha(has ? 1f : 0.72f);
+            v.setElevation(has ? dp(14) : 0);
+            animateScale(v, has ? 1.1f : 1f);
             if (has) {
                 focusLabel.setText(a.label);
                 ui.edit().putString("lastPkg", a.pkg).apply();
@@ -409,9 +420,9 @@ public class HomeActivity extends Activity {
         });
         outer.setOnClickListener(v -> launch(repo.launchIntent(a)));
         outer.setOnLongClickListener(v -> { startVoice(v); return true; });   // hold OK = talk
-        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(dp(128), dp(76));
-        p.leftMargin = dp(2);
-        p.rightMargin = dp(2);
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(dp(120), dp(68));
+        p.leftMargin = dp(6);
+        p.rightMargin = dp(6);
         outer.setLayoutParams(p);
         return outer;
     }
