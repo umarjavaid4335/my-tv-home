@@ -492,8 +492,9 @@ public class HomeActivity extends Activity {
         LinearLayout col = new LinearLayout(this);
         col.setOrientation(LinearLayout.VERTICAL);
         col.setPadding(dp(28), dp(20), dp(28), dp(18));
-        col.setClipChildren(false);
-        col.setClipToPadding(false);
+        // A ScrollView is only cut to its viewport when its *parent* clips children; leaving this off let
+        // scrolled channel rows paint over the title and tabs.
+        col.setClipChildren(true);
         LinearLayout head = new LinearLayout(this);
         head.setGravity(Gravity.CENTER_VERTICAL);
         TextView title = Ui.text(this, 22, Ui.MEDIUM, WHITE);
@@ -512,13 +513,14 @@ public class HomeActivity extends Activity {
         grid.setOrientation(LinearLayout.VERTICAL);
         grid.setClipChildren(false);
         grid.setClipToPadding(false);
-        grid.setPadding(dp(4), dp(6), dp(4), dp(6));
+        grid.setPadding(dp(8), dp(10), dp(8), dp(14));
         View first = null;
         for (final String tab : LiveTv.TABS) {
             if (live.inTab(tab).isEmpty()) continue;
-            TextView chip = chip(tab + "  " + live.inTab(tab).size());
+            final TextView chip = chip(tab + "  " + live.inTab(tab).size());
+            chip.setId(View.generateViewId());
             chip.setOnFocusChangeListener(chipFocus(chip, has -> {
-                if (has) fillLiveGrid(grid, tab, caption);
+                if (has) fillLiveGrid(grid, tab, caption, chip.getId());
             }));
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
             lp.rightMargin = dp(10);
@@ -526,10 +528,14 @@ public class HomeActivity extends Activity {
             if (first == null || tab.equals(startTab)) first = chip;
         }
         col.addView(tabs);
+        // The grid must stay inside its scroll area (with clipping off, scrolled rows painted over the title and
+        // tabs). Room for the focused card's 8% growth and shadow comes from the grid's own padding instead.
         ScrollView sv = new ScrollView(this);
         sv.setVerticalScrollBarEnabled(false);
-        sv.setClipChildren(false);
-        sv.setClipToPadding(false);
+        sv.setClipChildren(true);
+        sv.setClipToPadding(true);
+        sv.setVerticalFadingEdgeEnabled(true);            // rows fade softly under the tabs instead of a hard cut
+        sv.setFadingEdgeLength(dp(20));
         sv.addView(grid);
         col.addView(sv, new LinearLayout.LayoutParams(-1, 0, 1));
         p.addView(col, new FrameLayout.LayoutParams(-1, -1));
@@ -550,7 +556,8 @@ public class HomeActivity extends Activity {
         };
     }
 
-    private void fillLiveGrid(LinearLayout grid, final String tab, final TextView caption) {
+    /** tabChipId: Up from the first row returns to this tab's chip instead of whichever chip is above. */
+    private void fillLiveGrid(LinearLayout grid, final String tab, final TextView caption, int tabChipId) {
         grid.removeAllViews();
         LinearLayout row = null;
         int perRow = 6, i = 0;
@@ -562,7 +569,9 @@ public class HomeActivity extends Activity {
                 rp.bottomMargin = dp(12);
                 grid.addView(row, rp);
             }
-            row.addView(channelCard(ch, tab, caption));
+            View card = channelCard(ch, tab, caption);
+            if (i <= perRow) card.setNextFocusUpId(tabChipId);
+            row.addView(card);
         }
     }
 
