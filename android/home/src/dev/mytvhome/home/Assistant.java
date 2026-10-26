@@ -35,6 +35,8 @@ final class Assistant {
         String weatherSummary();
         String showMovies(JSONArray movies);
         String youtube(String query);
+        String playChannel(String name);
+        String showLiveTv();
         List<String> appNames();
         List<String> backgroundNames();
     }
@@ -175,6 +177,8 @@ final class Assistant {
                     case "get_weather": out[0] = tv.weatherSummary(); break;
                     case "show_movies": out[0] = tv.showMovies(args.optJSONArray("movies")); break;
                     case "youtube_search": out[0] = tv.youtube(args.optString("query")); break;
+                    case "play_channel": out[0] = tv.playChannel(args.optString("name")); break;
+                    case "show_live_tv": out[0] = tv.showLiveTv(); break;
                     default: break;
                 }
             } catch (Exception e) {
@@ -194,7 +198,8 @@ final class Assistant {
                 + "Reply in the language the user spoke (English or Urdu; Urdu in Urdu script).\n"
                 + "Use tools to act on the TV: open_app for 'open/play/watch <app>', volume for louder/quieter/mute/set level, "
                 + "set_background to change the home screen photo, get_weather for weather (Lahore, Celsius), "
-                + "youtube_search to play or find something on YouTube (songs, trailers, videos).\n"
+                + "youtube_search to play or find something on YouTube (songs, trailers, videos), "
+                + "play_channel to watch a live TV channel (e.g. Geo News, Hum TV, PTV News), show_live_tv for the channel list.\n"
                 + "You cannot open a specific title inside Netflix or Prime Video; open the app instead.\n"
                 + "For movie or show recommendations ALWAYS call show_movies with 3 to 5 real titles that suit the request "
                 + "(family-friendly unless asked otherwise), then say one line about them. Prefer titles likely on Netflix, "
@@ -213,6 +218,9 @@ final class Assistant {
                 .put(fn("set_background", "Change the home screen background photo.",
                         props().put("name", str("Background title or 'next'")), "name"))
                 .put(fn("get_weather", "Current weather and 4-day forecast for Lahore.", props(), null))
+                .put(fn("play_channel", "Watch a live TV channel by name.",
+                        props().put("name", str("Channel name, e.g. Geo News, ARY News, Hum TV, PTV News")), "name"))
+                .put(fn("show_live_tv", "Show the Live TV channel list on screen.", props(), null))
                 .put(fn("youtube_search", "Open YouTube search results, e.g. songs, trailers, cooking videos, news clips.",
                         props().put("query", str("What to search on YouTube")), "query"))
                 .put(fn("show_movies", "Show movie/show recommendation cards on the TV.",

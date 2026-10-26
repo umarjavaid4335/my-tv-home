@@ -113,3 +113,23 @@ Uninstall). Nothing on the TV was disabled, removed, rooted or flashed.
 - Camera-watcher idea from [victaphu/glass-home-samsung-tv](https://github.com/victaphu/glass-home-samsung-tv)
   `tools/phonecam.py`; rewritten here with authentication, expiry and freshness checks (no code copied).
 - Icons are drawn in code (`Glyph.java`); no third-party icon sets.
+
+## Live TV
+
+The **LIVE TV** tile (first in the dock) opens a channel screen with tabs - News, Entertainment,
+Religious, Kids, Sports & Music. **OK** on a channel starts it; voice works too ("play Geo News").
+
+| Source | Channels | How it plays |
+|---|---|---|
+| Official 24/7 YouTube live streams | Geo News, ARY News, Samaa, Express, Dunya, Dawn, PTV News, 92 News, Aaj, GNN, BOL News, HUM News, Suno, 24 News, Neo, City 42, Lahore News, Public News, Capital TV, ARY Qtv | My Home looks up the channel's current live video and opens it in YouTube |
+| Free public streams from [iptv-org](https://github.com/iptv-org/iptv) (open source, Unlicense), only those that respond from this network | ~40, e.g. Hum TV, Bol Entertainment, Zindagi, Filmax, Discover Pakistan, Madani, Peace TV Urdu, Minimax, PK Sports | My Home's own full-screen player (platform MediaPlayer/HLS). **Up/Down** = next/previous channel in the tab, **OK** = channel info, **Back** = close |
+| Official network apps | ARY Digital, ARY Zindagi, A Sports, ARY Musik (ARY ZAP) | opens the app |
+
+Refresh the list (free streams come and go): `python tools/build_live_list.py` then `tools/tv.sh deploy`.
+`tools/check_streams.py <m3u>` tests any playlist from this network.
+
+Notes: iptv-org lists only *publicly available* streams, but it does not guarantee each stream is
+authorised by the broadcaster - prefer the official sources. Channels like Geo Entertainment, ARY Digital,
+PTV Home/Sports or Geo Super are not offered as free public streams; they are available legally through the
+networks' own apps (ARY ZAP) or Jazz's Tamasha app (free with ads, some channels need a plan). No pirated
+streams are included. The TV's built-in tuner (antenna/cable) is unused: none is connected.

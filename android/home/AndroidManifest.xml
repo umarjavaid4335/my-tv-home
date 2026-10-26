@@ -27,7 +27,7 @@
     </queries>
 
     <application android:label="My Home" android:banner="@drawable/banner" android:icon="@drawable/banner"
-        android:allowBackup="false" android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
+        android:allowBackup="false" android:usesCleartextTraffic="true" android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
         <activity android:name=".HomeActivity" android:exported="true" android:launchMode="singleTask"
             android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|uiMode|screenSize|screenLayout|smallestScreenSize">
             <intent-filter>
@@ -43,6 +43,11 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <!-- Full-screen player for free live streams. -->
+        <activity android:name=".PlayerActivity" android:exported="false" android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen"
+            android:configChanges="keyboard|keyboardHidden|navigation|uiMode|screenSize|screenLayout|smallestScreenSize" />
 
         <!-- Cold boot -> My Home (Quick Start standby already resumes the last app). -->
         <receiver android:name=".BootReceiver" android:exported="true">

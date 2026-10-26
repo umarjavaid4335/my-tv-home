@@ -28,6 +28,9 @@ case "${1:-}" in
     for _ in $(seq "${3:-1}"); do adb_ shell input keyevent "KEYCODE_$2"; sleep 0.35; done ;;
   shot) mkdir -p private/evidence; adb_ exec-out screencap -p > "private/evidence/$2.png"; echo "private/evidence/$2.png" ;;
   top) adb_ shell dumpsys activity activities | grep -m1 -E "mResumedActivity" ;;
+  ensure)   # fail unless My Home is in front - guard before sending navigation keys
+    adb_ shell dumpsys activity activities | grep -m1 -E "mResumedActivity" | grep -q "$PKG/" \
+      || { echo "My Home is not in front - not sending keys" >&2; exit 3; } ;;
   uninstall) adb_ uninstall $PKG ;;
   *) sed -n '2,9p' "$0"; exit 1 ;;
 esac

@@ -79,6 +79,7 @@ public class HomeActivity extends Activity {
     private final VoiceRecorder recorder = new VoiceRecorder();
     private View aLevel;
     private Assistant assistant;
+    private LiveTv live;
     private TextToSpeech tts;
     private boolean ttsReady;
     private View micButton, voiceOpener;
@@ -108,6 +109,7 @@ public class HomeActivity extends Activity {
         long t0 = System.currentTimeMillis();
         ui = getSharedPreferences("ui", MODE_PRIVATE);
         repo = new AppRepo(this);
+        live = new LiveTv(this);
         weather = new Weather(this);
         backdrop = new Backdrop(this);
         reduced = Ui.reducedMotion(this);
@@ -358,8 +360,18 @@ public class HomeActivity extends Activity {
         View f = getCurrentFocus();
         if (f != null && f.getTag() instanceof String) focusedPkg = (String) f.getTag();
         dockRow.removeAllViews();
+        if (!live.all.isEmpty()) dockRow.addView(liveTile());
         for (AppRepo.App a : repo.shown()) dockRow.addView(tile(a));
         int n = dockRow.getChildCount();
+        // Size tiles so the whole dock fits the content width (16:9 tiles, 96-120 dp wide).
+        float density = getResources().getDisplayMetrics().density;
+        float availDp = getResources().getDisplayMetrics().widthPixels / density - 2 * M - 2 * DOCK_PAD;
+        int tileW = Math.max(96, Math.min(120, Math.round(availDp / Math.max(1, n) - 12)));
+        for (int i = 0; i < n; i++) {
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) dockRow.getChildAt(i).getLayoutParams();
+            lp.width = dp(tileW);
+            lp.height = dp(Math.round(tileW * 9f / 16f));
+        }
         if (n > 0) {                                      // Left/Right stop at the dock's ends (Up reaches the buttons)
             View first = dockRow.getChildAt(0), last = dockRow.getChildAt(n - 1);
             first.setId(View.generateViewId());
@@ -425,6 +437,182 @@ public class HomeActivity extends Activity {
         p.rightMargin = dp(6);
         outer.setLayoutParams(p);
         return outer;
+    }
+
+    /** First dock tile: opens the Live TV screen. Same focus behaviour as app tiles. */
+    private View liveTile() {
+        final float radius = dp(10);
+        ViewOutlineProvider rounded = new ViewOutlineProvider() {
+            @Override public void getOutline(View v, Outline o) { o.setRoundRect(0, 0, v.getWidth(), v.getHeight(), radius); }
+        };
+        FrameLayout outer = new FrameLayout(this);
+        outer.setTag("live-tv");
+        outer.setFocusable(true);
+        outer.setContentDescription("Live TV");
+        outer.setOutlineProvider(rounded);
+        outer.setClipToOutline(true);
+        outer.setBackground(new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[]{0xFFB3261E, 0xFF5A1414}));
+        LinearLayout c = new LinearLayout(this);
+        c.setGravity(Gravity.CENTER);
+        View dot = new View(this);
+        GradientDrawable d = new GradientDrawable();
+        d.setShape(GradientDrawable.OVAL);
+        d.setColor(WHITE);
+        dot.setBackground(d);
+        c.addView(dot, new LinearLayout.LayoutParams(dp(8), dp(8)));
+        TextView t = Ui.text(this, 17, Ui.MEDIUM, WHITE);
+        t.setText("LIVE TV");
+        t.setLetterSpacing(0.08f);
+        LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(-2, -2);
+        tp.leftMargin = dp(8);
+        c.addView(t, tp);
+        outer.addView(c, new FrameLayout.LayoutParams(-1, -1));
+        outer.setAlpha(0.72f);
+        outer.setOnFocusChangeListener((v, has) -> {
+            v.setAlpha(has ? 1f : 0.72f);
+            v.setElevation(has ? dp(14) : 0);
+            animateScale(v, has ? 1.1f : 1f);
+            if (has) {
+                focusLabel.setText("Live TV  ·  " + live.all.size() + " channels");
+                ui.edit().putString("lastPkg", "live-tv").apply();
+            }
+        });
+        outer.setOnClickListener(v -> openLiveSheet(v, null));
+        outer.setOnLongClickListener(v -> { startVoice(v); return true; });
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(dp(120), dp(68));
+        p.leftMargin = dp(6);
+        p.rightMargin = dp(6);
+        outer.setLayoutParams(p);
+        return outer;
+    }
+
+    /** Live TV sheet: category tabs (switch on focus) and a grid of channel cards. */
+    private void openLiveSheet(View opener, String startTab) {
+        GlassPanel p = glass(28);
+        LinearLayout col = new LinearLayout(this);
+        col.setOrientation(LinearLayout.VERTICAL);
+        col.setPadding(dp(28), dp(20), dp(28), dp(18));
+        col.setClipChildren(false);
+        col.setClipToPadding(false);
+        LinearLayout head = new LinearLayout(this);
+        head.setGravity(Gravity.CENTER_VERTICAL);
+        TextView title = Ui.text(this, 22, Ui.MEDIUM, WHITE);
+        title.setText("Live TV");
+        head.addView(title);
+        final TextView caption = Ui.text(this, 14, Ui.REGULAR, WHITE_80);
+        caption.setSingleLine(true);
+        LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, -2, 1);
+        cp.leftMargin = dp(20);
+        head.addView(caption, cp);
+        col.addView(head);
+
+        LinearLayout tabs = new LinearLayout(this);
+        tabs.setPadding(0, dp(12), 0, dp(8));
+        final LinearLayout grid = new LinearLayout(this);
+        grid.setOrientation(LinearLayout.VERTICAL);
+        grid.setClipChildren(false);
+        grid.setClipToPadding(false);
+        grid.setPadding(dp(4), dp(6), dp(4), dp(6));
+        View first = null;
+        for (final String tab : LiveTv.TABS) {
+            if (live.inTab(tab).isEmpty()) continue;
+            TextView chip = chip(tab + "  " + live.inTab(tab).size());
+            chip.setOnFocusChangeListener(chipFocus(chip, has -> {
+                if (has) fillLiveGrid(grid, tab, caption);
+            }));
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
+            lp.rightMargin = dp(10);
+            tabs.addView(chip, lp);
+            if (first == null || tab.equals(startTab)) first = chip;
+        }
+        col.addView(tabs);
+        ScrollView sv = new ScrollView(this);
+        sv.setVerticalScrollBarEnabled(false);
+        sv.setClipChildren(false);
+        sv.setClipToPadding(false);
+        sv.addView(grid);
+        col.addView(sv, new LinearLayout.LayoutParams(-1, 0, 1));
+        p.addView(col, new FrameLayout.LayoutParams(-1, -1));
+        caption.setText("Free official streams and public channels  ·  OK to watch");
+        // Full content area of the grid (covers clock and weather) so nothing is cut in half behind it.
+        showSheet(p, opener, first, lp(-1, -1, Gravity.CENTER, M, EDGE, M, EDGE));
+    }
+
+    interface FocusHook { void on(boolean has); }
+
+    /** Chip focus styling (as chip()) plus an extra hook. */
+    private View.OnFocusChangeListener chipFocus(final TextView c, final FocusHook hook) {
+        final GradientDrawable bg = (GradientDrawable) c.getBackground();
+        return (v, has) -> {
+            bg.setColor(has ? 0xF2FFFFFF : 0x1AFFFFFF);
+            c.setTextColor(has ? 0xFF111418 : WHITE);
+            hook.on(has);
+        };
+    }
+
+    private void fillLiveGrid(LinearLayout grid, final String tab, final TextView caption) {
+        grid.removeAllViews();
+        LinearLayout row = null;
+        int perRow = 6, i = 0;
+        for (final LiveTv.Channel ch : live.inTab(tab)) {
+            if (i++ % perRow == 0) {
+                row = new LinearLayout(this);
+                row.setClipChildren(false);
+                LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(-1, -2);
+                rp.bottomMargin = dp(12);
+                grid.addView(row, rp);
+            }
+            row.addView(channelCard(ch, tab, caption));
+        }
+    }
+
+    private View channelCard(final LiveTv.Channel ch, final String tab, final TextView caption) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setFocusable(true);
+        FrameLayout box = new FrameLayout(this);
+        box.setClipToOutline(true);
+        box.setOutlineProvider(new ViewOutlineProvider() {
+            @Override public void getOutline(View v, Outline o) { o.setRoundRect(0, 0, v.getWidth(), v.getHeight(), dp(10)); }
+        });
+        box.setBackground(new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[]{0xFF2E3648, 0xFF161B26}));
+        if (ch.logo == null) {                            // no logo: the card shows the name itself
+            TextView initials = Ui.text(this, 15, Ui.MEDIUM, WHITE_80);
+            initials.setText(ch.name);
+            initials.setGravity(Gravity.CENTER);
+            initials.setPadding(dp(6), 0, dp(6), 0);
+            box.addView(initials, new FrameLayout.LayoutParams(-1, -1));
+        }
+        ImageView logo = new ImageView(this);
+        logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        logo.setPadding(dp(14), dp(10), dp(14), dp(10));
+        box.addView(logo, new FrameLayout.LayoutParams(-1, -1));
+        if (ch.logo != null) live.loadLogo(ch.logo, logo);
+        card.addView(box, new LinearLayout.LayoutParams(dp(112), dp(63)));
+        TextView name = Ui.text(this, 12, Ui.REGULAR, WHITE);
+        name.setText(ch.name);
+        name.setSingleLine(true);
+        name.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        LinearLayout.LayoutParams np = new LinearLayout.LayoutParams(dp(112), -2);
+        np.topMargin = dp(6);
+        card.addView(name, np);
+        card.setAlpha(0.8f);
+        final String source = "youtube".equals(ch.type) ? "official live stream on YouTube"
+                : "app".equals(ch.type) ? "opens in its official app" : "free stream · iptv-org";
+        card.setOnFocusChangeListener((v, has) -> {
+            v.setAlpha(has ? 1f : 0.8f);
+            box.setElevation(has ? dp(12) : 0);
+            animateScale(v, has ? 1.08f : 1f);
+            if (has) caption.setText(ch.name + "  ·  " + source);
+        });
+        card.setOnClickListener(v -> {
+            caption.setText("Opening " + ch.name + "…");
+            live.play(ch, tab, err -> { if (err != null) caption.setText(err); });
+        });
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
+        lp.rightMargin = dp(16);
+        card.setLayoutParams(lp);
+        return card;
     }
 
     private void restoreDockFocus() {
@@ -1063,6 +1251,21 @@ public class HomeActivity extends Activity {
             aMovies.setVisibility(View.VISIBLE);
             if (aMovies.getChildCount() > 0) aMovies.getChildAt(0).requestFocus();
             return "showing " + aMovies.getChildCount() + " titles on screen";
+        }
+
+        @Override public String playChannel(String name) {
+            final LiveTv.Channel ch = live.find(name);
+            if (ch == null) return "no such channel. Channels: " + live.names();
+            main.postDelayed(() -> {
+                closeSheet();
+                live.play(ch, null, err -> { if (err != null) focusLabel.setText(err); });
+            }, 1200);
+            return "tuning to " + ch.name;
+        }
+
+        @Override public String showLiveTv() {
+            main.postDelayed(() -> { closeSheet(); openLiveSheet(micButton, null); }, 900);
+            return "showing the Live TV channel list";
         }
 
         @Override public String youtube(String query) {

@@ -1,0 +1,619 @@
+{
+ "generated": "2026-10-26",
+ "channels": [
+  {
+   "name": "Geo News",
+   "type": "youtube",
+   "channel_id": "UC_vt34wimdCzdkrzVejwX9g",
+   "handle": "geonews",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/ba1XSUznVGirkC7dP-iDCf3EcL8uUjDea3-4wxkqdyWGUlCVwLXotwRNdjQBRYg7VQ4dIEI7=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "ARY News",
+   "type": "youtube",
+   "channel_id": "UCMmpLL2ucRHAXbNHiCPyIyg",
+   "handle": "ArynewsTvofficial",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/aFll6hZv30m0y0jJbjNYLlyuzYtOPQ7ctxXD7XW2ND8tmEhV8yHrHo8PSFcmb5LlrazeRJLd1A=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "Samaa TV",
+   "type": "youtube",
+   "channel_id": "UCJekW1Vj5fCVEGdye_mBN6Q",
+   "handle": "samaatv",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/tTXEQKei5Aknpq66juIUMMOGsU9iGNzMcWyeYau6bnxMLxN_i7THGsFS1AtQ09OARSklaMZ6_w=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "Express News",
+   "type": "youtube",
+   "channel_id": "UCTur7oM6mLL0rM2k0znuZpQ",
+   "handle": "ExpressNewspkofficial",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/k-jivmg9360iSkUzKNQ_BTIXiQvvz2SfV26vOD4X6xQ93JnPqh9u5ouW5cHZerQZ1c0lTxLu3g=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "Dunya News",
+   "type": "youtube",
+   "channel_id": "UCnMBV5Iw4WqKILKue1nP6Hg",
+   "handle": "DunyanewsOfficial",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/EmB54Qk4In8FzGBiKsAdJgBUiFEA0okL9CsRd6VV7BmBQMEQldJeD6gPiQMlsnTXOfJhBhN9RQ=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "Dawn News",
+   "type": "youtube",
+   "channel_id": "UCaxR-D8FjZ-2otbU0_Y2grg",
+   "handle": "dawnnewspakistan",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/68a9f3o813BKheJgbuzHk0j5x5PUWXlEzYMDY7vYrZTM7DHQfXk8JBfsqlSV5-KFcMOgps9PmxU=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "PTV News",
+   "type": "youtube",
+   "channel_id": "UC5RvV_LtR1dxPCVFGw6dxXA",
+   "handle": "PTVNewsOfficial",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/nnqueGOaGSP81pIgfClenqnT2fGNiQH0pgX35GVqWFeO-YLk3dUPWhaAdaHN0w0IXosHxrPM=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "92 News HD",
+   "type": "youtube",
+   "channel_id": "UCsgC5cbz3DE2Shh34gNKiog",
+   "handle": "92newshdTv",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/hSTolMeWLzOEL4imZHpmbp_nVqpGU-sFh6k3G0GvPG2Hj7cLGEfNAmbtnwgnatptpHMlXD-7=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "Aaj News",
+   "type": "youtube",
+   "channel_id": "UCgBAPAcLsh_MAPvJprIz89w",
+   "handle": "aajtvofficial",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/7ceWstIx_9L12Q2pwPQWS4-1eIHGxjfzH1cXMIS_bgHtqRYL0yfjERcSU9aCKbYv3CsewJ4v=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "GNN",
+   "type": "youtube",
+   "channel_id": "UC35KuZBNIj4S5Ls0yjY-UHQ",
+   "handle": "gnnhdofficial",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/ehEWKNzXNBLXpFaS7qxZJUQ0jLodEMjDuPExRrk1vBUwKPglvxmwbZmpdhlTmsouI5jCGXN9OnE=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "BOL News",
+   "type": "youtube",
+   "channel_id": "UCz2yxQJZgiB_5elTzqV7FiQ",
+   "handle": "BOLNewsOfficial",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/DNI1AzS-X2lr10Dx3AGQZdC8iGjN74PHg9FZ0_1mfeoNoUyaZRvD1Pu95pKO-zvQw0eqHlq2WoU=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "HUM News",
+   "type": "youtube",
+   "channel_id": "UC0Um3pnZ2WGBEeoA3BX2sKw",
+   "handle": "HUMNewsPakistan",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/-fU36Wb-OG08ZHxSmjelBIqnu_LD_zVTrGtMrRibHpNtiMWvu1SFeAU4NIMwkrPdyrLYJPmH4Q=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "Suno News",
+   "type": "youtube",
+   "channel_id": "UCB82Zom1MYh8VV4q7wXkfGA",
+   "handle": "SunoNewsHD",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/_DgGScTjuw4CQJZjjDFjlhtTBOlyvHRfodLVBUMjWeOWODxtDUnv3KvpH4gUevZCpPQrHDVg2w=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "24 News HD",
+   "type": "youtube",
+   "channel_id": "UCcmpeVbSSQlZRvHfdC-CRwg",
+   "handle": "24NewsHD",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/jh0d2yGqPLAifpxtp-EWtt1fHYFCp3jfDsOCrGPl6S4NiBon8FF1DaX-sBNAbnIEXsb3DTdo=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "Neo News",
+   "type": "youtube",
+   "channel_id": "UCVFRuO5SJ45-pu8PMLKzS2Q",
+   "handle": "NeoNews_Live",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/aZAQq9Po-m-UXHRx1OKX5M26dwyH9RRjTqItIqiKUpiVu_OYbw7v1JQ8ucAOIhkA1HRaclYu=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "City 42",
+   "type": "youtube",
+   "channel_id": "UCdTup4kK7Ze08KYp7ReiuMw",
+   "handle": "City42Lahore",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/VmDPNdCbi7RGQrI51ZTkWMaWe43CnJsXvYBdQfYA-4E1I-inDJEbEMgubDRr8V05PcBIC9Be=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "Lahore News HD",
+   "type": "youtube",
+   "channel_id": "UC0CbUVRC1d1RvunYbp3w2qQ",
+   "handle": "LahoreNewsOfficial",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/ytc/AIdro_l_OtL7hx23HAh4sLCulRWKXd0VdYHhCV7Ov-eCRL_vKd4=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "Public News",
+   "type": "youtube",
+   "channel_id": "UCElJZvY_RVra6qjD8WSQYog",
+   "handle": "PublicNewsPK",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/I0rRWnohHx4TSJgLIfUOUU_yl2QrodBoRyvaTFovwi3v54AhKzya9_CdFw5fvA-mEfn6UHim=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "Capital TV",
+   "type": "youtube",
+   "channel_id": "UC-an6pHQfTVZXgrLP0p1EGA",
+   "handle": "CapitalTVLive",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/Kpxl9h97-GspN2hX7wuKm8ttVVUCSqPj6CTTpympCw3uBTml2LvVUxSyWCmxQfBlwO9XXpeNeq0=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "ARY Qtv",
+   "type": "youtube",
+   "channel_id": "UCE2oY4S4wOu6WofU2YbfWsw",
+   "handle": "ARYQtvofficial",
+   "category": "News",
+   "logo": "https://yt3.googleusercontent.com/NljFRPT_QrIRRNyg-FpzxOm20qrSD1mNELt_03fq4p6AU_eygnyupESVFkuhrafL-U1iDMGKow=s240-c-k-c0x00ffffff-no-rj",
+   "live_now": true
+  },
+  {
+   "name": "8XM",
+   "type": "stream",
+   "url": "https://cdn4.mjunoon.tv:8087/streamtest/131M/chunks.m3u8",
+   "headers": {},
+   "category": "Sports & Music",
+   "logo": "https://i.ibb.co/Kc0xHyBb/8XM-Logo.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "365 News",
+   "type": "stream",
+   "url": "https://cdn4.mjunoon.tv:8087/streamtest/140M/chunks.m3u8",
+   "headers": {},
+   "category": "News",
+   "logo": "https://i.imgur.com/8I6PWof.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "ABN Urdu",
+   "type": "stream",
+   "url": "https://mediaserver.abnvideos.com/streams/abnurdu.m3u8",
+   "headers": {},
+   "category": "Religious",
+   "logo": "https://i.imgur.com/Y9ScPIl.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Aik News SD",
+   "type": "stream",
+   "url": "https://s2.ideationtec.live/Pnn/Pnn.m3u8?token=KsR3k27_sH3n-2",
+   "headers": {},
+   "category": "News",
+   "logo": "https://i.imgur.com/svPXoAP.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "aurLife HD",
+   "type": "stream",
+   "url": "http://124.109.47.101/hls/stream1.m3u8",
+   "headers": {},
+   "category": "Entertainment",
+   "logo": "https://i.imgur.com/GfWLn3O.jpg",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Bol Entertainment HD",
+   "type": "stream",
+   "url": "https://vodzong.mjunoon.tv:8087/streamtest/Channel5-159-4/playlist.m3u8",
+   "headers": {},
+   "category": "Entertainment",
+   "logo": "https://i.imgur.com/eajSRFo.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "BS Film",
+   "type": "stream",
+   "url": "https://lbgo.bozztv.com/ssh101/ssh101/bsfilm/playlist.m3u8",
+   "headers": {},
+   "category": "Entertainment",
+   "logo": "https://www.vivalivetv.com/public/files/shows/0/1/3953-640x360-FFFFFF.jpg",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "BSTV (Pakistan)",
+   "type": "stream",
+   "url": "https://lbgo.bozztv.com/ssh101/ssh101/bstv/playlist.m3u8",
+   "headers": {},
+   "category": "Entertainment",
+   "logo": "https://www.vivalivetv.com/public/files/shows/0/1/3952-640x360-FFFFFF.jpg",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Cartoon Network (Pakistan)",
+   "type": "stream",
+   "url": "https://vodzong.mjunoon.tv:8087/streamtest/cartoon-network-87/live/87H/chunks.m3u8",
+   "headers": {},
+   "category": "Kids",
+   "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Cartoon_Network_2010_logo.svg/960px-Cartoon_Network_2010_logo.svg.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Discover Pakistan",
+   "type": "stream",
+   "url": "https://livecdn.live247stream.com/discoverpakistan/web/playlist.m3u8",
+   "headers": {},
+   "category": "Entertainment",
+   "logo": "https://i.imgur.com/IJH47fJ.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Falak TV",
+   "type": "stream",
+   "url": "https://falak.rst.ae/index.m3u8",
+   "headers": {},
+   "category": "Entertainment",
+   "logo": "https://i.imgur.com/2TqlNsI.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Fazal TV",
+   "type": "stream",
+   "url": "http://cdn9.live247stream.com/punjabitvcanada/tv/playlist.m3u8",
+   "headers": {},
+   "category": "Religious",
+   "logo": "https://i.imgur.com/c0fvKia.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Filmax",
+   "type": "stream",
+   "url": "https://s3.ideationtec.live/Filmax/Filmax.m3u8",
+   "headers": {},
+   "category": "Entertainment",
+   "logo": "https://i.imgur.com/eLmdZ6k.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "God Stands Kids Club TV",
+   "type": "stream",
+   "url": "https://online.godstands.tv:5443/WebRTCApp/streams/kidsenglish.m3u8",
+   "headers": {},
+   "category": "Kids",
+   "logo": "https://i.imgur.com/FxDBbpz.jpeg",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "God Stands Kids Club TV Arabic",
+   "type": "stream",
+   "url": "https://online.godstands.tv:5443/WebRTCApp/streams/KidsArabic.m3u8",
+   "headers": {},
+   "category": "Kids",
+   "logo": "https://i.imgur.com/FxDBbpz.jpeg",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "God Stands Kids Club TV Chinese",
+   "type": "stream",
+   "url": "https://online.godstands.tv:5443/WebRTCApp/streams/KidsChinese.m3u8",
+   "headers": {},
+   "category": "Kids",
+   "logo": "https://i.imgur.com/FxDBbpz.jpeg",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "God Stands Kids Club TV Urdu",
+   "type": "stream",
+   "url": "https://online.godstands.tv:5443/WebRTCApp/streams/KidsUrdu.m3u8",
+   "headers": {},
+   "category": "Kids",
+   "logo": "https://i.imgur.com/FxDBbpz.jpeg",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "God Stands TV Arabic",
+   "type": "stream",
+   "url": "https://online.godstands.tv:5443/WebRTCApp/streams/Arabic.m3u8",
+   "headers": {},
+   "category": "Religious",
+   "logo": "https://i.imgur.com/EO6cYUI.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "God Stands TV English",
+   "type": "stream",
+   "url": "https://online.godstands.tv:5443/WebRTCApp/streams/EnglishStreaming.m3u8",
+   "headers": {},
+   "category": "Religious",
+   "logo": "https://i.imgur.com/EO6cYUI.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "God Stands TV Punjabi",
+   "type": "stream",
+   "url": "https://online.godstands.tv:5443/WebRTCApp/streams/PunjabiStreaming.m3u8",
+   "headers": {},
+   "category": "Religious",
+   "logo": "https://i.imgur.com/EO6cYUI.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "God Stands TV Tagalog",
+   "type": "stream",
+   "url": "https://online.godstands.tv:5443/WebRTCApp/streams/Tagalog.m3u8",
+   "headers": {},
+   "category": "Religious",
+   "logo": "https://i.imgur.com/EO6cYUI.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Grace Network",
+   "type": "stream",
+   "url": "https://livecdn.live247stream.com/grace/tv/playlist.m3u8",
+   "headers": {},
+   "category": "Religious",
+   "logo": "https://i.imgur.com/QSaZPJ4.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Hum TV",
+   "type": "stream",
+   "url": "https://g4wlkwx8l23a-hls-live.5centscdn.com/HUM/271ddf829afeece44d8732757fba1a66.sdp/playlist_dvr.m3u8",
+   "headers": {},
+   "category": "Entertainment",
+   "logo": "https://i.ibb.co/Tx4GfKT5/Hum-TV-HD.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Isaac TV",
+   "type": "stream",
+   "url": "https://livecdn.live247stream.com/isaac/tv/playlist.m3u8",
+   "headers": {},
+   "category": "Religious",
+   "logo": "https://i.imgur.com/RHDbsiO.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Jeremiah TV",
+   "type": "stream",
+   "url": "https://x.streamablecloud.com/stream/hls/jeremiahtv/index.m3u8",
+   "headers": {},
+   "category": "Entertainment",
+   "logo": "https://raw.githubusercontent.com/songwenhui239/Songwenhui239/refs/heads/main/Jeremiah%20TV.jpeg",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "JooMusic",
+   "type": "stream",
+   "url": "https://livecdn.live247stream.com/joomusic/tv/playlist.m3u8",
+   "headers": {},
+   "category": "Sports & Music",
+   "logo": "https://i.imgur.com/KHuKQQL.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Joshua TV",
+   "type": "stream",
+   "url": "https://livecdn.live247stream.com/joshua/tv/playlist.m3u8",
+   "headers": {},
+   "category": "Religious",
+   "logo": "https://i.imgur.com/x9xPR2h.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "King TV",
+   "type": "stream",
+   "url": "https://streamer12.vdn.dstreamone.net/kingtv/kingtv/playlist.m3u8",
+   "headers": {},
+   "category": "Religious",
+   "logo": "https://i.imgur.com/dujrwRE.png",
+   "not247": true,
+   "source": "iptv-org"
+  },
+  {
+   "name": "KTN News",
+   "type": "stream",
+   "url": "https://vodzong.mjunoon.tv:8087/streamtest/KTNNews-151/playlist.m3u8",
+   "headers": {},
+   "category": "News",
+   "logo": "https://i.imgur.com/RtEzpPQ.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "M News",
+   "type": "stream",
+   "url": "https://cdn.rabta.stream/M-News/index.m3u8",
+   "headers": {},
+   "category": "News",
+   "logo": "https://mnews.pk/wp-content/uploads/2025/10/mnews-logo-news.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "M Sports",
+   "type": "stream",
+   "url": "https://cdn.rabta.stream/M-Sports/index.m3u8",
+   "headers": {},
+   "category": "Sports & Music",
+   "logo": "https://msports.pk/wp-content/uploads/2026/02/m-sports-300.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Madani Channel Urdu",
+   "type": "stream",
+   "url": "https://streaming.madanichannel.tv/static/streaming-playlists/hls/b9790f10-cb0d-4e30-82bf-84a756234e58/master.m3u8",
+   "headers": {},
+   "category": "Religious",
+   "logo": "https://i.imgur.com/MitLeCJ.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Minimax (Pakistan)",
+   "type": "stream",
+   "url": "https://vodzong.mjunoon.tv:8087/streamtest/disckids-157-1/playlist.m3u8",
+   "headers": {},
+   "category": "Kids",
+   "logo": "https://i.imgur.com/TJvf8vd.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "News One",
+   "type": "stream",
+   "url": "https://vodzong.mjunoon.tv:8087/streamtest/NEWS1-128/playlist.m3u8",
+   "headers": {},
+   "category": "News",
+   "logo": "https://i.imgur.com/ivrRYMk.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Peace TV Urdu",
+   "type": "stream",
+   "url": "https://dzkyvlfyge.erbvr.com/PeaceTvUrdu/index.m3u8",
+   "headers": {},
+   "category": "Religious",
+   "logo": "https://github.com/fawazahmed0/tiger/raw/master/peace/urdu.jpg",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "PK Sports",
+   "type": "stream",
+   "url": "https://lbgo.bozztv.com/ssh101/ssh101/pksportshd/playlist.m3u8",
+   "headers": {},
+   "category": "Sports & Music",
+   "logo": "https://i.imgur.com/qtbSnrY.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "PMI TV",
+   "type": "stream",
+   "url": "https://cdn.live247stream.com/pmi/tv/playlist.m3u8",
+   "headers": {},
+   "category": "Entertainment",
+   "logo": "https://i.imgur.com/SfyCwXj.png",
+   "not247": true,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Praise TV",
+   "type": "stream",
+   "url": "https://livecdn.live247stream.com/praise/tv/playlist.m3u8",
+   "headers": {},
+   "category": "Entertainment",
+   "logo": "https://i.imgur.com/T9fIdLs.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Sky News Urdu",
+   "type": "stream",
+   "url": "https://lbgo.bozztv.com/ssh101/ssh101/skynews/playlist.m3u8",
+   "headers": {},
+   "category": "News",
+   "logo": "https://raw.githubusercontent.com/songwenhui239/Songwenhui239/refs/heads/main/sky-news-urdu-pk.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Such TV",
+   "type": "stream",
+   "url": "https://video.primexsports.com/suchnews/live/playlist.m3u8",
+   "headers": {},
+   "category": "News",
+   "logo": "https://i.imgur.com/yYMh3JJ.png",
+   "not247": false,
+   "source": "iptv-org"
+  },
+  {
+   "name": "Zindagi TV",
+   "type": "stream",
+   "url": "https://5ad386ff92705.streamlock.net/live_transcoder/ngrp:zindagitv.stream_all/chunklist.m3u8",
+   "headers": {},
+   "category": "Entertainment",
+   "logo": "https://i.imgur.com/XBHvR5J.png",
+   "not247": true,
+   "source": "iptv-org"
+  },
+  {
+   "name": "ARY Digital",
+   "type": "app",
+   "package": "com.release.aryzaptv",
+   "category": "Entertainment"
+  },
+  {
+   "name": "ARY Zindagi",
+   "type": "app",
+   "package": "com.release.aryzaptv",
+   "category": "Entertainment"
+  },
+  {
+   "name": "A Sports",
+   "type": "app",
+   "package": "com.release.aryzaptv",
+   "category": "Sports & Music"
+  },
+  {
+   "name": "ARY Musik",
+   "type": "app",
+   "package": "com.release.aryzaptv",
+   "category": "Sports & Music"
+  }
+ ]
+}
