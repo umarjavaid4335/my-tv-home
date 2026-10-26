@@ -70,16 +70,28 @@ def build(app_dir):
     run(tool("aapt2"), "compile", "--dir", app / "res", "-o", out / "res.zip")
     link = [tool("aapt2"), "link", "-I", ANDROID_JAR, "--manifest", app / "AndroidManifest.xml",
             "--java", out / "gen", "-o", out / "base.apk", "--auto-add-overlay", out / "res.zip"]
+    # Assets = the app's own assets plus, for My Home, the git-ignored assistant key (owner chose to keep
+    # keys on the TV). The merged copy lives only under private/build.
+    assets = out / "assets"
     if (app / "assets").is_dir():
-        link += ["-A", app / "assets"]
+        shutil.copytree(app / "assets", assets)
+    secrets = PRIVATE / "assistant.secrets.json"
+    if name == "home" and secrets.exists():
+        (assets / "secrets").mkdir(parents=True, exist_ok=True)
+        shutil.copy(secrets, assets / "secrets" / "assistant.json")
+    if assets.is_dir():
+        link += ["-A", assets]
     run(*link)
     srcs = [str(p) for p in (app / "src").rglob("*.java")] + [str(p) for p in (out / "gen").rglob("*.java")]
     # java.* from the JDK's release-8 signatures (includes LambdaMetafactory); android.* from android.jar.
     # d8 below desugars lambdas for the device.
     run(JH / "bin" / "javac", "-nowarn", "-encoding", "UTF-8", "--release", "8",
         "-classpath", ANDROID_JAR, "-d", out / "classes", *srcs)
-    classes = [str(p) for p in (out / "classes").rglob("*.class")]
-    run(tool("d8"), "--release", "--min-api", MIN_API, "--lib", ANDROID_JAR, "--output", out, *classes)
+    # One jar instead of hundreds of .class paths (Windows command-line length limit).
+    with zipfile.ZipFile(out / "classes.jar", "w") as jar:
+        for p in (out / "classes").rglob("*.class"):
+            jar.write(p, p.relative_to(out / "classes").as_posix())
+    run(tool("d8"), "--release", "--min-api", MIN_API, "--lib", ANDROID_JAR, "--output", out, out / "classes.jar")
     shutil.copy(out / "base.apk", out / "unaligned.apk")
     with zipfile.ZipFile(out / "unaligned.apk", "a") as z:
         z.write(out / "classes.dex", "classes.dex")

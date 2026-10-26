@@ -2,6 +2,7 @@ package dev.mytvhome.home;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,10 +14,13 @@ import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -70,6 +74,18 @@ public class HomeActivity extends Activity {
     private View sheet, sheetOpener;
     private ValueAnimator drift;
 
+    // Assistant
+    private static final int VOICE_REQUEST = 7, MIC_PERMISSION = 8;
+    private final VoiceRecorder recorder = new VoiceRecorder();
+    private View aLevel;
+    private Assistant assistant;
+    private TextToSpeech tts;
+    private boolean ttsReady;
+    private View micButton, voiceOpener;
+    private TextView aQuestion, aAnswer;
+    private LinearLayout aMovies;
+    private View aAskAgain;
+
     private final List<JSONObject> backgrounds = new ArrayList<>();
     private final List<GlassPanel> glass = new ArrayList<>();
     private Weather.Data lastWeather;
@@ -101,7 +117,13 @@ public class HomeActivity extends Activity {
         backdrop.load("bg/" + currentBg().optString("file"));
         lastWeather = weather.cached();
         renderWeather();
+        assistant = new Assistant(this, tvActions);
         Log.i(TAG, "onCreate " + (System.currentTimeMillis() - t0) + " ms");
+    }
+
+    @Override protected void onDestroy() {
+        super.onDestroy();
+        if (tts != null) tts.shutdown();
     }
 
     @Override protected void onResume() {
@@ -186,6 +208,8 @@ public class HomeActivity extends Activity {
         LinearLayout buttons = new LinearLayout(this);
         buttons.setPadding(dp(8), 0, dp(8), 0);
         buttons.setGravity(Gravity.CENTER_VERTICAL);
+        micButton = utilityButton(Glyph.MIC, "Ask My Home  ·  or hold OK anywhere", v -> startVoice(v));
+        buttons.addView(cell(micButton));
         buttons.addView(cell(utilityButton(Glyph.IMAGE, "Backgrounds", v -> openBackgroundSheet(v))));
         buttons.addView(cell(utilityButton(Glyph.GRID, "Arrange dock", v -> openDockSheet(v))));
         buttons.addView(cell(utilityButton(Glyph.GEAR, "Settings", v -> launch(new Intent(Settings.ACTION_SETTINGS)))));
@@ -303,6 +327,7 @@ public class HomeActivity extends Activity {
         g.setKind(kind);
         b.addView(g, new FrameLayout.LayoutParams(dp(26), dp(26), Gravity.CENTER));
         b.setOnClickListener(onClick);
+        b.setOnLongClickListener(v -> { startVoice(v); return true; });   // hold OK = talk
         b.setOnKeyListener((v, code, e) -> {           // Down from the pill returns to the last app, not the nearest
             if (code == KeyEvent.KEYCODE_DPAD_DOWN && e.getAction() == KeyEvent.ACTION_DOWN && dockRow.getChildCount() > 0) {
                 restoreDockFocus();
@@ -383,6 +408,7 @@ public class HomeActivity extends Activity {
             }
         });
         outer.setOnClickListener(v -> launch(repo.launchIntent(a)));
+        outer.setOnLongClickListener(v -> { startVoice(v); return true; });   // hold OK = talk
         LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(dp(128), dp(76));
         p.leftMargin = dp(2);
         p.rightMargin = dp(2);
@@ -701,6 +727,11 @@ public class HomeActivity extends Activity {
 
     private void closeSheet() {
         if (sheet == null) return;
+        if (tts != null) tts.stop();
+        recorder.stop();
+        aQuestion = aAnswer = null;
+        aMovies = null;
+        aLevel = null;
         root.removeView(sheet);
         glass.remove(sheet);
         sheet = null;
@@ -711,6 +742,336 @@ public class HomeActivity extends Activity {
         if (sheetOpener != null) sheetOpener.requestFocus();   // focus goes back to whatever opened the sheet
         sheetOpener = null;
     }
+
+    // ------------------------------------------------------------------ assistant
+
+    /** Push-to-talk: record from the TV microphone, Gemini transcribes, then the assistant answers. */
+    private void startVoice(View opener) {
+        if (tts != null) tts.stop();
+        if (opener != null && sheet == null) voiceOpener = opener;
+        if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{android.Manifest.permission.RECORD_AUDIO}, MIC_PERMISSION);
+            return;
+        }
+        if (recorder.running()) { recorder.stop(); return; }   // second press = "I'm done"
+        if (aAnswer == null) openAssistantSheet(voiceOpener != null ? voiceOpener : micButton);
+        aQuestion.setText("Listening… speak now");
+        aAnswer.setText("");
+        aMovies.removeAllViews();
+        aMovies.setVisibility(View.GONE);
+        aLevel.setVisibility(View.VISIBLE);
+        aLevel.setScaleX(0.04f);
+        recorder.start(new VoiceRecorder.Listener() {
+            @Override public void onLevel(float level) { if (aLevel != null) aLevel.setScaleX(Math.max(0.04f, level)); }
+            @Override public void onDone(byte[] wav) {
+                if (aLevel == null) return;                     // sheet closed meanwhile
+                aLevel.setVisibility(View.GONE);
+                if (wav == null) { aQuestion.setText("I didn't hear anything. Press Ask again and speak."); return; }
+                aQuestion.setText("…");
+                aAnswer.setText("Understanding…");
+                final long t0 = System.currentTimeMillis();
+                assistant.transcribe(wav, new Assistant.Heard() {
+                    @Override public void onText(String text) {
+                        Log.i(TAG, "heard in " + (System.currentTimeMillis() - t0) + " ms: " + text);
+                        if (aAnswer == null) return;
+                        if (text.isEmpty()) { aQuestion.setText("Sorry, I didn't catch that."); aAnswer.setText(""); return; }
+                        ask(text);
+                    }
+                    @Override public void onError(String message) { if (aAnswer != null) aAnswer.setText(message); }
+                });
+            }
+            @Override public void onError(String message) {
+                if (aLevel != null) aLevel.setVisibility(View.GONE);
+                if (aAnswer != null) aAnswer.setText(message);
+            }
+        });
+    }
+
+    @Override public void onRequestPermissionsResult(int request, String[] perms, int[] results) {
+        super.onRequestPermissionsResult(request, perms, results);
+        if (request != MIC_PERMISSION) return;
+        if (results.length > 0 && results[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) startVoice(null);
+        else startSystemVoice();
+    }
+
+    /** Fallback when microphone access is refused: the TV's own Google voice input (may not listen on TCL builds). */
+    private void startSystemVoice() {
+        Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                .putExtra(RecognizerIntent.EXTRA_PROMPT, "Ask My Home")
+                .putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+        try {
+            startActivityForResult(i, VOICE_REQUEST);
+        } catch (Exception e) {
+            Log.w(TAG, "voice input unavailable", e);
+            focusLabel.setText("Voice input isn't available on this TV");
+        }
+    }
+
+    @Override protected void onActivityResult(int request, int result, Intent data) {
+        super.onActivityResult(request, result, data);
+        if (request != VOICE_REQUEST || result != RESULT_OK || data == null) return;
+        List<String> heard = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+        if (heard == null || heard.isEmpty() || heard.get(0).trim().isEmpty()) return;
+        ask(heard.get(0).trim());
+    }
+
+    private void ask(String question) {
+        if (aAnswer == null) openAssistantSheet(voiceOpener != null ? voiceOpener : micButton);
+        aQuestion.setText("“" + question + "”");
+        aAnswer.setText("Thinking…");
+        aMovies.removeAllViews();
+        aMovies.setVisibility(View.GONE);
+        Log.i(TAG, "ask: " + question);
+        final long t0 = System.currentTimeMillis();
+        assistant.ask(question, new Assistant.Callback() {
+            @Override public void onAnswer(String text) {
+                Log.i(TAG, "answer in " + (System.currentTimeMillis() - t0) + " ms: " + text);
+                if (aAnswer == null) return;            // sheet was closed (e.g. an app was opened)
+                aAnswer.setText(text);
+                speak(text);
+            }
+            @Override public void onError(String message) {
+                if (aAnswer != null) aAnswer.setText(message);
+            }
+        });
+    }
+
+    private void openAssistantSheet(View opener) {
+        GlassPanel p = glass(28);
+        LinearLayout col = new LinearLayout(this);
+        col.setOrientation(LinearLayout.VERTICAL);
+        col.setPadding(dp(28), dp(20), dp(28), dp(20));
+        col.setClipChildren(false);
+        col.setClipToPadding(false);
+        LinearLayout head = new LinearLayout(this);
+        head.setGravity(Gravity.CENTER_VERTICAL);
+        aQuestion = Ui.text(this, 15, Ui.REGULAR, WHITE_80);
+        aQuestion.setSingleLine(true);
+        head.addView(aQuestion, new LinearLayout.LayoutParams(0, -2, 1));
+        TextView again = chip("Ask again");
+        again.setOnClickListener(v -> startVoice(null));
+        aAskAgain = again;
+        head.addView(again);
+        col.addView(head);
+        aLevel = new View(this);                         // live mic level while listening
+        GradientDrawable bar = new GradientDrawable();
+        bar.setCornerRadius(dp(3));
+        bar.setColor(0xE6FFFFFF);
+        aLevel.setBackground(bar);
+        aLevel.setPivotX(0);
+        aLevel.setVisibility(View.GONE);
+        LinearLayout.LayoutParams lvp = new LinearLayout.LayoutParams(-1, dp(6));
+        lvp.topMargin = dp(12);
+        col.addView(aLevel, lvp);
+        aAnswer = Ui.text(this, 22, Ui.REGULAR, WHITE);
+        aAnswer.setLineSpacing(0, 1.15f);
+        aAnswer.setMaxLines(4);
+        LinearLayout.LayoutParams ap = new LinearLayout.LayoutParams(-1, -2);
+        ap.topMargin = dp(10);
+        col.addView(aAnswer, ap);
+        aMovies = new LinearLayout(this);
+        aMovies.setClipChildren(false);
+        aMovies.setClipToPadding(false);
+        aMovies.setPadding(0, dp(16), 0, dp(4));
+        aMovies.setVisibility(View.GONE);
+        col.addView(aMovies);
+        p.addView(col);
+        showSheet(p, opener, again, lp(-1, -2, Gravity.BOTTOM, M, 0, M, EDGE));
+    }
+
+    private void speak(String text) {
+        final boolean urdu = text.matches("(?s).*[\\u0600-\\u06FF].*");
+        Runnable go = () -> {
+            int r = tts.setLanguage(urdu ? new Locale("ur", "PK") : Locale.UK);
+            if (r == TextToSpeech.LANG_MISSING_DATA || r == TextToSpeech.LANG_NOT_SUPPORTED) tts.setLanguage(Locale.UK);
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "answer");
+        };
+        if (tts == null) {
+            tts = new TextToSpeech(this, status -> {
+                ttsReady = status == TextToSpeech.SUCCESS;
+                if (ttsReady) go.run();
+            });
+        } else if (ttsReady) {
+            go.run();
+        }
+    }
+
+    /** Opens YouTube's own search results (verified deep link on this TV; the TV's global search shows nothing). */
+    private void youtubeSearch(String query) {
+        try {
+            launch(new Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.youtube.com/results?search_query="
+                    + java.net.URLEncoder.encode(query, "UTF-8"))).setPackage("com.google.android.youtube.tv"));
+        } catch (Exception e) {
+            Log.w(TAG, "youtube search", e);
+        }
+    }
+
+    /** Poster card; OK opens the trailer search on YouTube. */
+    private View movieCard(final JSONObject m) {
+        final String title = m.optString("title"), year = m.optString("year", "");
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setFocusable(true);
+        card.setClipChildren(false);
+        FrameLayout poster = new FrameLayout(this);
+        poster.setClipToOutline(true);
+        poster.setOutlineProvider(new ViewOutlineProvider() {
+            @Override public void getOutline(View v, Outline o) { o.setRoundRect(0, 0, v.getWidth(), v.getHeight(), dp(10)); }
+        });
+        poster.setBackground(new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[]{0xFF3A4660, 0xFF1C2230}));
+        TextView fallback = Ui.text(this, 14, Ui.MEDIUM, WHITE_80);
+        fallback.setText(title);
+        fallback.setGravity(Gravity.CENTER);
+        fallback.setPadding(dp(8), 0, dp(8), 0);
+        poster.addView(fallback, new FrameLayout.LayoutParams(-1, -1));
+        ImageView iv = new ImageView(this);
+        iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        poster.addView(iv, new FrameLayout.LayoutParams(-1, -1));
+        final GradientDrawable ring = new GradientDrawable();
+        ring.setCornerRadius(dp(10));
+        poster.setForeground(ring);
+        card.addView(poster, new LinearLayout.LayoutParams(dp(92), dp(138)));
+        TextView t = Ui.text(this, 12, Ui.MEDIUM, WHITE);
+        t.setText(title + (year.isEmpty() ? "" : "  " + year));
+        t.setSingleLine(true);
+        t.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(dp(92), -2);
+        tp.topMargin = dp(6);
+        card.addView(t, tp);
+        final String reason = m.optString("reason");
+        final String service = m.optString("service", "unknown");
+        card.setOnFocusChangeListener((v, has) -> {
+            ring.setStroke(has ? dp(3) : 0, WHITE);
+            animateScale(v, has ? 1.08f : 1f);
+            if (has && aQuestion != null) aQuestion.setText(title + (reason.isEmpty() ? "" : "  ·  " + reason)
+                    + (service.equals("unknown") ? "" : "  ·  " + service));
+        });
+        card.setOnClickListener(v -> youtubeSearch(title + " " + year + " trailer"));
+        loadPoster(title, year, m.optString("kind", "movie"), iv);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
+        lp.rightMargin = dp(18);
+        card.setLayoutParams(lp);
+        return card;
+    }
+
+    /** Poster from Wikipedia's page summary (free, no key): tries "Title (YEAR film)", "Title (film)", "Title". */
+    private void loadPoster(final String title, final String year, final String kind, final ImageView into) {
+        new Thread(() -> {
+            String suffix = "series".equals(kind) ? "TV series" : "film";
+            String[] tries = {title + " (" + year + " " + suffix + ")", title + " (" + suffix + ")", title};
+            for (String t : tries) {
+                try {
+                    String url = "https://en.wikipedia.org/api/rest_v1/page/summary/"
+                            + java.net.URLEncoder.encode(t.replace(' ', '_'), "UTF-8").replace("+", "_");
+                    java.net.HttpURLConnection c = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
+                    c.setRequestProperty("User-Agent", "my-tv-home/1.0 (personal TV home screen)");
+                    c.setConnectTimeout(6000);
+                    c.setReadTimeout(6000);
+                    if (c.getResponseCode() != 200) continue;
+                    JSONObject s = new JSONObject(Assistant.read(c.getInputStream()));
+                    String desc = (s.optString("description") + " " + s.optString("extract")).toLowerCase(Locale.US);
+                    JSONObject th = s.optJSONObject("thumbnail");
+                    if (th == null || !(desc.contains("film") || desc.contains("series") || desc.contains("movie") || desc.contains("television"))) continue;
+                    String src = th.optString("source").replaceAll("/\\d+px-", "/300px-");
+                    try (InputStream in = new java.net.URL(src).openStream()) {
+                        final Bitmap b = BitmapFactory.decodeStream(in);
+                        if (b != null) { main.post(() -> into.setImageBitmap(b)); return; }
+                    }
+                } catch (Exception ignored) {
+                    // next candidate; the titled gradient card stays as fallback
+                }
+            }
+        }, "poster").start();
+    }
+
+    /** The only things the assistant can do to the TV. Runs on the main thread (Assistant posts here). */
+    private final Assistant.Tv tvActions = new Assistant.Tv() {
+        @Override public String openApp(String name) {
+            String n = name.toLowerCase(Locale.US).replace("+", " plus").trim();
+            AppRepo.App best = null;
+            for (AppRepo.App a : repo.all()) {
+                String l = a.label.toLowerCase(Locale.US);
+                if (l.equals(n)) { best = a; break; }
+                if (best == null && (l.contains(n) || n.contains(l)
+                        || (n.contains("prime") && a.pkg.contains("amazon"))
+                        || ((n.equals("tv") || n.contains("live tv")) && a.pkg.equals("com.tcl.tv"))
+                        || (n.contains("ary") && a.pkg.contains("aryzap")))) best = a;
+            }
+            if (best == null) return "not installed. Installed apps: " + appNames();
+            final AppRepo.App open = best;
+            main.postDelayed(() -> { closeSheet(); launch(repo.launchIntent(open)); }, 1200);
+            return "opening " + open.label;
+        }
+
+        @Override public String volume(String action, int level) {
+            AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
+            int s = AudioManager.STREAM_MUSIC, max = am.getStreamMaxVolume(s);
+            switch (action) {
+                case "up": for (int i = 0; i < 2; i++) am.adjustStreamVolume(s, AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI); break;
+                case "down": for (int i = 0; i < 2; i++) am.adjustStreamVolume(s, AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI); break;
+                case "mute": am.adjustStreamVolume(s, AudioManager.ADJUST_MUTE, AudioManager.FLAG_SHOW_UI); break;
+                case "unmute": am.adjustStreamVolume(s, AudioManager.ADJUST_UNMUTE, AudioManager.FLAG_SHOW_UI); break;
+                case "set":
+                    if (level < 0) return "need a level 0-100";
+                    am.setStreamVolume(s, Math.round(Math.min(100, level) / 100f * max), AudioManager.FLAG_SHOW_UI);
+                    break;
+                default: return "unknown action";
+            }
+            return "volume now " + Math.round(100f * am.getStreamVolume(s) / max) + "%";
+        }
+
+        @Override public String setBackground(String name) {
+            int idx = -1;
+            String n = name.toLowerCase(Locale.US);
+            if (n.contains("next") || n.contains("another") || n.contains("change")) idx = (ui.getInt("bg", 0) + 1) % backgrounds.size();
+            for (int i = 0; i < backgrounds.size() && idx < 0; i++) {
+                JSONObject b = backgrounds.get(i);
+                if ((b.optString("title") + " " + b.optString("file")).toLowerCase(Locale.US).contains(n)) idx = i;
+            }
+            if (idx < 0) return "no such background. Options: " + backgroundNames();
+            HomeActivity.this.setBackground(idx);
+            return "background set to " + backgrounds.get(idx).optString("title");
+        }
+
+        @Override public String weatherSummary() {
+            Weather.Data d = lastWeather;
+            if (d == null) return "no weather data (offline)";
+            StringBuilder s = new StringBuilder("Lahore now " + Math.round(d.temp) + "C, " + Weather.describe(d.code)
+                    + ", feels " + Math.round(d.feels) + "C.");
+            for (int i = 0; i < d.dates.length && i < 5; i++)
+                s.append(" ").append(d.dates[i]).append(": ").append(Weather.describe(d.dCode[i])).append(" ")
+                        .append(Math.round(d.dMax[i])).append("/").append(Math.round(d.dMin[i])).append("C.");
+            return s.toString();
+        }
+
+        @Override public String showMovies(JSONArray movies) {
+            if (movies == null || aMovies == null) return "nothing to show";
+            aMovies.removeAllViews();
+            for (int i = 0; i < movies.length() && i < 5; i++) aMovies.addView(movieCard(movies.optJSONObject(i)));
+            aMovies.setVisibility(View.VISIBLE);
+            if (aMovies.getChildCount() > 0) aMovies.getChildAt(0).requestFocus();
+            return "showing " + aMovies.getChildCount() + " titles on screen";
+        }
+
+        @Override public String youtube(String query) {
+            if (query == null || query.trim().isEmpty()) return "need a search query";
+            main.postDelayed(() -> { closeSheet(); youtubeSearch(query); }, 1200);
+            return "opening YouTube results for " + query;
+        }
+
+        @Override public List<String> appNames() {
+            List<String> out = new ArrayList<>();
+            for (AppRepo.App a : repo.all()) out.add(a.label);
+            return out;
+        }
+
+        @Override public List<String> backgroundNames() {
+            List<String> out = new ArrayList<>();
+            for (JSONObject b : backgrounds) out.add(b.optString("title"));
+            return out;
+        }
+    };
 
     // ------------------------------------------------------------------ helpers
 

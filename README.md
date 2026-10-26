@@ -59,6 +59,34 @@ My Home in front 63 s after power-on, helper running, Home button -> My Home.
 If the Home button ever opens the stock home again, My Home shows a small note at the bottom
 (*"Home button helper is off"*): check the Accessibility switch and the Auto Launch Permission above.
 
+## AI assistant
+
+Press **Up** to the **mic** button (first in the pill) and press **OK**, or **hold OK** on any dock tile or
+pill button. Speak when it says *Listening*; it stops by itself when you pause (press OK again to stop
+early). Examples: "recommend a funny movie", "what's the weather this week", "make it louder",
+"change the background", "open Netflix", "play some Coke Studio songs". Answers appear on a glass panel
+and are spoken by the TV. Movie picks show as poster cards; **OK on a card opens its trailer on YouTube**.
+**Ask again** continues the conversation; **Back** closes it.
+
+How it works (all on the TV, no extra machine):
+- **Voice**: My Home records from the TV's built-in far-field microphone only while you are asking
+  (Android "Microphone" permission, granted once). The TV's Google voice-input screen is not used: on this
+  TCL firmware it never opens the mic for apps (TCL's mic manager owns the remote/Assistant-button path),
+  and the remote's Assistant button is reserved for Google Assistant.
+- **Speech -> text**: Gemini 2.5 Flash-Lite. **Thinking/answers**: Gemini 2.5 Flash with a small allow-list of
+  tools (`open_app`, `volume`, `set_background`, `get_weather`, `show_movies`, `youtube_search`), falling back
+  to Flash-Lite / Gemini 3 Flash when the free per-minute limit is hit.
+- **Posters**: Wikipedia page summaries (no key). **Speech out**: the TV's Google text-to-speech.
+- **Key**: the owner's Google AI Studio key lives in `private/assistant.secrets.json` (git-ignored) and is
+  copied into the APK at build time (`tools/build_apk.py`). Never commit it; anyone with the built APK file
+  can extract it, so keep `private/build/` private.
+- **Privacy**: audio is held in memory only and sent to Google for transcription; nothing is stored on the
+  TV. On Google's free tier, prompts may be used to improve Google's products.
+- **Limits**: no live web search on the free tier (the assistant says so for news/scores); it can't open a
+  specific title inside Netflix/Prime; no smart-home devices yet (lights can be added later).
+- OpenRouter is not used: its account currently has no credit and its data-policy settings exclude all
+  providers; Gemini covers everything for free.
+
 ## Build and install (Windows, from this repo)
 
 Prereqs (all local, no accounts): Python 3, JDK 17 (`winget install Microsoft.OpenJDK.17`),

@@ -34,6 +34,17 @@ Private device details (addresses, identifiers) live in `private/device-inventor
 | Launch times | cold 1.2-2.1 s (2.1 s just after boot), warm ~0.9-1.0 s (`am start -W`) | adb |
 | Idle | ~0.16 CPU-s per minute (~0.3 % of one core), ~29 MB PSS | /proc stat, meminfo |
 
+### AI assistant (2026-10-26)
+| Check | Result |
+|---|---|
+| Remote's Assistant button | TCL-private broadcast to com.tcl.assistant -> Google Assistant; not available to apps |
+| RecognizerIntent (Google voice bar) | opens, but never captures on this firmware (com.tcl.micmanager owns the mic) |
+| AudioRecord (VOICE_RECOGNITION) | works after RECORD_AUDIO grant; room ~40-70 rms, speech ~1300-9000, first 300 ms burst ignored |
+| Owner voice tests | "recommend a feel-good family movie" -> 4 poster cards; "open YouTube" -> opened; weather -> forecast; "make it louder", "change the background", "recommend a funny movie" -> all worked |
+| Latency | transcription ~1.8-3 s, answer ~0.8-2.9 s after speech ends |
+| Movie card OK | GLOBAL_SEARCH does nothing visible; YouTube `results?search_query=` deep link verified |
+| Free quota | 2.5 Flash hit the per-minute limit during rapid tests -> model fallback added |
+
 The "helper is off" note was seen on screen while the helper was unbound, and disappears once it runs.
 
 ## Blockers / needs from owner

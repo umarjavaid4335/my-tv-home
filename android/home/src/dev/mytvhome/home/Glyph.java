@@ -10,7 +10,7 @@ import android.view.View;
 /** Small line-drawn icons (weather + utility buttons); drawn in code so no icon assets/licences are needed. */
 final class Glyph extends View {
     static final int SUN = 0, MOON = 1, PARTLY = 2, CLOUD = 3, FOG = 4, DRIZZLE = 5, RAIN = 6, SNOW = 7,
-            STORM = 8, IMAGE = 20, GRID = 21, GEAR = 22, HOUSE = 23, UNKNOWN = 99;
+            STORM = 8, IMAGE = 20, GRID = 21, GEAR = 22, HOUSE = 23, MIC = 24, UNKNOWN = 99;
 
     private final Paint stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -107,6 +107,14 @@ final class Glyph extends View {
                 }
                 c.drawCircle(cx, cy, s * 0.21f, stroke);
                 c.drawCircle(cx, cy, s * 0.08f, stroke);
+                break;
+            case MIC:
+                r.set(cx - s * 0.11f, cy - s * 0.32f, cx + s * 0.11f, cy + s * 0.06f);
+                c.drawRoundRect(r, s * 0.11f, s * 0.11f, stroke);
+                r.set(cx - s * 0.22f, cy - s * 0.14f, cx + s * 0.22f, cy + s * 0.18f);
+                c.drawArc(r, 0, 180, false, stroke);
+                c.drawLine(cx, cy + s * 0.18f, cx, cy + s * 0.3f, stroke);
+                c.drawLine(cx - s * 0.1f, cy + s * 0.3f, cx + s * 0.1f, cy + s * 0.3f, stroke);
                 break;
             case HOUSE:
                 path.reset();
